@@ -9,7 +9,7 @@ Initializer that will return a json schema object
 #TODO add add functionality separately (from a shell or program) with a persist option in the fn call
 class Schema():
 
-
+    dict = None
     """
     Constructor takes in an input json file and schema map (also JSON)
     """
@@ -17,7 +17,7 @@ class Schema():
     def __init__(self, input, schema_map):
         inp = self.read_json(input)
         dmap = self.read_json(schema_map)
-        return self.json_map(inp, dmap)
+        self.dict =  self.json_map(inp, dmap)
 
 
     """
@@ -29,7 +29,7 @@ class Schema():
             exit()
         try:
             with open(file) as f:
-                return json.loads(f)
+                return json.load(f)
         except ValueError:
             print 'Error processing file, aborting'
             exit()
@@ -51,3 +51,20 @@ class Schema():
                 output[key] = inp[key]
 
         return output
+
+    """
+    write the current values of the dict var to a file
+    NOTE: will overwrite any contents of said file
+    """
+    def to_file(self, file_name, new_lines = False):
+        if not new_lines:
+            with open(file_name, 'w') as f:
+                f.write(json.dumps(self.dict))
+        else:
+            with open(file_name, 'w') as f:
+                f.write(u'{')
+                for key in self.dict:
+                    #this could have unintended consequences by coercing the ints into unicode
+                    #FIXME get rid of the comma on the last one
+                    f.write(key + u' : ' + unicode(self.dict[key]) + u',\n')
+                f.write(u'}')
